@@ -35,7 +35,7 @@ GET http://localhost/api
       doc <- autodoc.apply[String](interpreter("{}", 200), doc) { res =>
         Assert.equal(200, res.status)
       }
-      _ <- Assert.equal(expected, doc.to("GET /api"))
+      _ <- Assert.equal(expected, doc.generate("GET /api"))
     } yield ()
   }
 }

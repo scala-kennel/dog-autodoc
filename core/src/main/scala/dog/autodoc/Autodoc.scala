@@ -9,7 +9,7 @@ final case class Autodoc[A](
   request: Request,
   response: Response[A]) {
 
-  def to(title: String)(implicit A: EncodeJson[A]): String = {
+  def generate(title: String)(implicit A: EncodeJson[A]): String = {
     val req = RequestDocument.from(request)
     val res = ResponseDocument.from(response.map(v => A.encode(v).toString()))
     dog.autodoc.templates.md.document(title, description, req, res).body
