@@ -26,9 +26,9 @@ object build extends Build {
       httpz
     ),
     TwirlKeys.templateImports ++= Seq(
-        "dog.autodoc.{ RequestDocument, ResponseDocument }"
-      ),
-      TwirlKeys.templateFormats += ("md" -> "dog.twirl.MarkdownFormat")
+      "dog.autodoc.{ RequestDocument, ResponseDocument }"
+    ),
+    TwirlKeys.templateFormats += ("md" -> "dog.twirl.MarkdownFormat")
   ).enablePlugins(SbtTwirl)
 
   val root = Project("root", file(".")).settings(
