@@ -2,23 +2,23 @@ package dog
 package autodoc
 
 import httpz._
-import argonaut.{EncodeJson, DecodeJson}
+import argonaut._
 
-final case class Autodoc[A](
+final case class Autodoc[A: Show](
   description: Option[String],
   request: Request,
   response: Response[A]) {
 
-  def generate(title: String)(implicit A: EncodeJson[A]): String = {
+  def generate(title: String): String = {
     val req = RequestDocument.from(request)
-    val res = ResponseDocument.from(response.map(v => A.encode(v).toString()))
+    val res = ResponseDocument.from(implicitly[Show[A]].show(response))
     dog.autodoc.templates.md.document(title, description, req, res).body
   }
 }
 
 object Autodoc {
 
-  def json[A: DecodeJson](req: Request) =
+  def json[A: CodecJson](req: Request) =
     Core.jsonResponse(req).map(res => Autodoc(None, req, res))
 
   def string(req: Request) =
