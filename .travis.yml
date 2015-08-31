@@ -12,3 +12,7 @@ jdk:
 cache:
   directories:
     - $HOME/.ivy2/cache
+
+before_cache:
+  - find $HOME/.ivy2/cache -name "ivydata-*.properties" | xargs rm
+  - find $HOME/.ivy2/cache -name "*SNAPSHOT*" | xargs rm -rf
