@@ -9,6 +9,7 @@ import dog.DogPlugin.autoImport._
 object build extends Build {
 
   private[this] val coreName = "dog-autodoc-core"
+  private[this] val autodocName = "dog-autodoc"
   private[this] val pluginName = "sbt-dog-autodoc"
   private[this] val allName = "dog-autodoc-all"
 
@@ -17,6 +18,7 @@ object build extends Build {
 
   val modules: List[String] = (
     coreName ::
+    autodocName ::
     pluginName ::
     allName ::
     Nil
@@ -42,6 +44,17 @@ object build extends Build {
     TwirlKeys.templateFormats += ("md" -> "dog.twirl.MarkdownFormat")
   ).enablePlugins(SbtTwirl)
 
+  lazy val autodoc = module(autodocName).settings(
+    name := autodocName,
+    scalaVersion := scala211,
+    crossScalaVersions := Seq("2.10.5", scala211),
+    dogVersion := Dependencies.Version.dog,
+    description := "autodoc for dog",
+    libraryDependencies ++= Seq(
+      scalazStream
+    )
+  ).dependsOn(core)
+
   lazy val plugin = module(pluginName).settings(
     ScriptedPlugin.scriptedSettings
   ).settings(
@@ -64,6 +77,6 @@ object build extends Build {
     name := allName,
     packagedArtifacts := Map.empty
   ).aggregate(
-    core, plugin
+    core, autodoc, plugin
   )
 }
