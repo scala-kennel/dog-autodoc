@@ -16,8 +16,7 @@ object AutodocTest extends Dog {
     )).leftMap(Error.http).nel
 
   val toMarkdown = {
-    val expected = """
-## GET /api
+    val expected = """## GET /api
 
 #### Request
 ```
@@ -29,13 +28,12 @@ GET http://localhost/api
 200
 
 "{}"
-```
-"""
+```"""
     for {
       doc <- autodoc.apply[String](interpreter("{}", 200), doc) { res =>
         Assert.equal(200, res.status)
       }
       _ <- Assert.equal(expected, doc.generate("GET /api"))
-    } yield ()
+    } yield doc
   }
 }

@@ -12,7 +12,7 @@ final case class Autodoc[A: Show](
   def generate(title: String): String = {
     val req = RequestDocument.from(request)
     val res = ResponseDocument.from(implicitly[Show[A]].show(response))
-    dog.autodoc.templates.md.document(title, description, req, res).body
+    dog.autodoc.templates.md.document(title, description, req, res).body.trim
   }
 }
 

@@ -45,6 +45,9 @@ object build extends Build {
   ).enablePlugins(SbtTwirl)
 
   lazy val autodoc = module(autodocName).settings(
+    dogSettings
+  )
+  .settings(
     name := autodocName,
     scalaVersion := scala211,
     crossScalaVersions := Seq("2.10.5", scala211),
