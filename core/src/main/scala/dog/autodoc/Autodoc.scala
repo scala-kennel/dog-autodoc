@@ -2,7 +2,7 @@ package dog
 package autodoc
 
 import httpz._
-import argonaut._
+import argonaut.DecodeJson
 
 final case class Autodoc[A: Show](
   description: Option[String],
@@ -18,7 +18,7 @@ final case class Autodoc[A: Show](
 
 object Autodoc {
 
-  def json[A: CodecJson](req: Request) =
+  def json[A <: JsonToString[A]: DecodeJson](req: Request) =
     Core.jsonResponse(req).map(res => Autodoc(None, req, res))
 
   def string(req: Request) =

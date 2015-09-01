@@ -8,7 +8,7 @@ object WriterTest extends Dog {
 
   val writeDoc = TestCase.delay {
     val test = for {
-      doc <- AutodocTest.toMarkdown
+      doc <- AutodocTest.`simple GET api`
       _ <- TestCase.delay {
         val title = "GET /api"
         Writer.write(Seq((title, TestResult(doc))), "Api", "doc")

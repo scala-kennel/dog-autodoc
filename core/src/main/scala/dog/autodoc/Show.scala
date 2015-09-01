@@ -1,8 +1,7 @@
 package dog
 package autodoc
 
-import httpz.{Response, ByteArray}
-import argonaut.EncodeJson
+import httpz._
 
 // TODO: rename
 trait Show[A] {
@@ -12,8 +11,8 @@ trait Show[A] {
 
 object Show {
 
-  implicit def json[A](implicit A: EncodeJson[A]): Show[A] = new Show[A] {
-    def show(response: Response[A]) = response.map(v => A.encode(v).toString())
+  implicit def json[A <: JsonToString[A]]: Show[A] = new Show[A] {
+    def show(response: Response[A]) = response.map(v => v.toString)
   }
 
   implicit val string: Show[String] = new Show[String] {
