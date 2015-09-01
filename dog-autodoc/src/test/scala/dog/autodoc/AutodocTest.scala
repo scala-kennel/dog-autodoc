@@ -42,7 +42,7 @@ GET http://localhost/api
 
   implicit val personCodec: CodecJson[Person] = casecodec2(Person.apply, Person.unapply)("name", "age")
 
-  val getPerson = Autodoc.json(Request(
+  val getPerson = Autodoc.json[Person](Request(
       method = "GET",
       url = "http://localhost/person/1"
     )).leftMap(Error.http).nel
