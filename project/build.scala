@@ -33,7 +33,7 @@ object build extends Build {
     TwirlKeys.templateFormats += ("md" -> "dog.twirl.MarkdownFormat")
   ).enablePlugins(SbtTwirl)
 
-  lazy val autodoc = module(autodocName).settings(
+  lazy val autodoc = module("autodoc").settings(
     name := autodocName,
     libraryDependencies ++= Seq(
       dogLib
