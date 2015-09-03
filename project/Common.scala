@@ -4,6 +4,7 @@ import sbtrelease.ReleaseStateTransformations._
 import sbtrelease.ReleasePlugin.autoImport._
 import xerial.sbt.Sonatype._
 import com.typesafe.sbt.pgp.PgpKeys
+import dog.DogPlugin.autoImport._
 
 object Common {
 
@@ -17,9 +18,14 @@ object Common {
     Nil
   )
 
+  private[this] val scala211 = "2.11.7"
+
   lazy val commonSettings = Seq(
-    sonatypeSettings
+    sonatypeSettings,
+    dogSettings
   ).flatten ++ Seq(
+    scalaVersion := scala211,
+    crossScalaVersions := Seq("2.10.5", scala211),
     resolvers += Opts.resolver.sonatypeReleases,
     scalacOptions ++= (
       "-deprecation" ::
@@ -36,6 +42,7 @@ object Common {
       case Some((2, v)) if v >= 11 => unusedWarnings
     }.toList.flatten,
     fullResolvers ~= {_.filterNot(_.name == "jcenter")},
+    dogVersion := Dependencies.Version.dog,
     releaseProcess := Seq[ReleaseStep](
       checkSnapshotDependencies,
       inquireVersions,
@@ -78,6 +85,7 @@ object Common {
         <tag>{if(isSnapshot.value) gitHash else { "v" + version.value }}</tag>
       </scm>
     ,
+    description := "autodoc for dog",
     pomPostProcess := { node =>
       import scala.xml._
       import scala.xml.transform._
