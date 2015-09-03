@@ -17,7 +17,7 @@ object ResponseDocument {
       else {
         "\n" + (for {
           kvp <- res.headers
-        } yield s"${kvp._1}: ${kvp._2}").mkString("\n")
+        } yield s"""${kvp._1}: ${kvp._2.mkString("; ")}""").mkString("\n")
       }
     val body =
       if(res.body.trim.isEmpty) ""

@@ -8,8 +8,8 @@ object AutodocTest extends Dog {
 
   def str(value: String) = new ByteArray(value.getBytes())
 
-  def interpreter(value: String, status: Int) =
-    FakeInterpreter(str(value), status, Map()).sequential.empty
+  def interpreter(value: String, status: Int, headers: Map[String, List[String]] = Map()) =
+    FakeInterpreter(str(value), status, headers).sequential.empty
 
   val getApi = Autodoc.string(Request(
       method = "GET",
@@ -69,6 +69,41 @@ GET http://localhost/person/1
         Assert.equal(200, res.status)
       }
       _ <- Assert.equal(expected, doc.generate("GET /person/:id"))
+    } yield doc
+  }
+
+  val getApiWithHeader = Autodoc.string(Request(
+      method = "GET",
+      url = "http://localhost/api",
+      headers = Map("Content-Type" -> "text/plain")
+    )).leftMap(Error.http).nel
+
+  val `GET api with header` = {
+    val expected = """## GET /api
+
+#### Request
+```
+GET http://localhost/api
+Content-Type: text/plain
+```
+
+#### Response
+```
+200
+X-XSS-Protection: 1; mode=block
+
+"{}"
+```"""
+    for {
+      doc <- autodoc.apply[String](
+        interpreter(
+          "{}",
+          200,
+          Map("X-XSS-Protection" -> List("1", "mode=block"))
+        ), getApiWithHeader) { res =>
+          Assert.equal(200, res.status)
+        }
+      _ <- Assert.equal(expected, doc.generate("GET /api"))
     } yield doc
   }
 }
