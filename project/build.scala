@@ -36,8 +36,7 @@ object build extends Build {
   lazy val autodoc = module(autodocName).settings(
     name := autodocName,
     libraryDependencies ++= Seq(
-      dogLib,
-      scalazStream
+      dogLib
     )
   ).dependsOn(core)
 
