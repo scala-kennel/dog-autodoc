@@ -10,3 +10,5 @@ port of [autodoc](https://github.com/r7kamura/autodoc) for [dog](https://github.
 libraryDependencies += "com.github.pocketberserker" %% "dog-autodoc" % "0.0.1" % "test"
 ```
 
+or you can use [sbt plugin](https://github.com/pocketberserker/sbt-dog-autodoc)
+
