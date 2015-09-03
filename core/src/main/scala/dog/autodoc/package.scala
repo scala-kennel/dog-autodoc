@@ -6,7 +6,7 @@ import httpz._
 package object autodoc {
 
   def apply[A: Show](interpreter: Interpreter[Id], p: ActionNel[Autodoc[A]], description: String = "")
-    (test: Response[A] => TestCase[Unit]): TestCase[Autodoc[A]] = {
+    (test: Response[A] => TestCase[Unit]): TestCase[AutodocMarker] = {
     val d = if(description.trim.isEmpty) None else Some(description)
     val r = interpreter.run(p)
     r match {

@@ -4,16 +4,26 @@ package autodoc
 import httpz._
 import argonaut.DecodeJson
 
-final case class Autodoc[A: Show](
+trait AutodocMarker {
+  type A
+  def generate(title: String): String
+  def toAutoDoc: Autodoc[A]
+}
+
+final case class Autodoc[A0: Show](
   description: Option[String],
   request: Request,
-  response: Response[A]) {
+  response: Response[A0]) extends AutodocMarker {
 
-  def generate(title: String): String = {
+  type A = A0
+
+  override def generate(title: String) = {
     val req = RequestDocument.from(request)
     val res = ResponseDocument.from(implicitly[Show[A]].show(response))
     dog.autodoc.templates.md.document(title, description, req, res).body.trim
   }
+
+  override def toAutoDoc = this
 }
 
 object Autodoc {
