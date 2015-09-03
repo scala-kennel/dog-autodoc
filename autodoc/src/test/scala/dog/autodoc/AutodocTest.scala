@@ -106,4 +106,35 @@ X-XSS-Protection: 1; mode=block
       _ <- Assert.equal(expected, doc.generate("GET /api"))
     } yield doc
   }
+
+  val queryPerson = Autodoc.json[Person](Request(
+      method = "GET",
+      url = "http://localhost/persons",
+      params = Map("foo" -> "bar", "a" -> "b")
+    )).leftMap(Error.http).nel
+
+  val `query json` = {
+    val expected = """## GET /persons?foo=bar&a=b
+
+#### Request
+```
+GET http://localhost/persons?foo=bar&a=b
+```
+
+#### Response
+```
+200
+
+{
+  "name" : "Alice",
+  "age" : 17
+}
+```"""
+    for {
+      doc <- autodoc.apply[Person](interpreter(Person("Alice", 17).toString, 200), queryPerson) { res =>
+        Assert.equal(200, res.status)
+      }
+      _ <- Assert.equal(expected, doc.generate("GET /persons?foo=bar&a=b"))
+    } yield doc
+  }
 }

@@ -24,8 +24,8 @@ object RequestDocument {
       if(req.params.isEmpty) req.url
       else {
         val query = (for {
-          kvp <- req.headers
-        } yield s"${kvp._1}=${kvp._2}").mkString
+          kvp <- req.params
+        } yield s"${kvp._1}=${kvp._2}").mkString("&")
         s"${req.url}?${query}"
       }
     val body = req.body match {
