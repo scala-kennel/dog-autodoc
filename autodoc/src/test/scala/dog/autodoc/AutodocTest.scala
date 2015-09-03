@@ -31,7 +31,7 @@ GET http://localhost/api
 "{}"
 ```"""
     for {
-      doc <- autodoc.apply[String](interpreter("{}", 200), getApi) { res =>
+      doc <- Autodoc[String](interpreter("{}", 200), getApi) { res =>
         Assert.equal(200, res.status)
       }
       _ <- Assert.equal(expected, doc.generate("GET /api"))
@@ -65,7 +65,7 @@ GET http://localhost/person/1
 }
 ```"""
     for {
-      doc <- autodoc.apply[Person](interpreter(Person("Alice", 17).toString, 200), getPerson) { res =>
+      doc <- Autodoc[Person](interpreter(Person("Alice", 17).toString, 200), getPerson) { res =>
         Assert.equal(200, res.status)
       }
       _ <- Assert.equal(expected, doc.generate("GET /person/:id"))
@@ -95,7 +95,7 @@ X-XSS-Protection: 1; mode=block
 "{}"
 ```"""
     for {
-      doc <- autodoc.apply[String](
+      doc <- Autodoc[String](
         interpreter(
           "{}",
           200,
@@ -131,7 +131,7 @@ GET http://localhost/persons?foo=bar&a=b
 }
 ```"""
     for {
-      doc <- autodoc.apply[Person](interpreter(Person("Alice", 17).toString, 200), queryPerson) { res =>
+      doc <- Autodoc[Person](interpreter(Person("Alice", 17).toString, 200), queryPerson) { res =>
         Assert.equal(200, res.status)
       }
       _ <- Assert.equal(expected, doc.generate("GET /persons?foo=bar&a=b"))

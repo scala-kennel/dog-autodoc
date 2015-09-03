@@ -1,6 +1,7 @@
 package dog
 package autodoc
 
+import scalaz._, Id._
 import httpz._
 import argonaut.DecodeJson
 
@@ -27,6 +28,16 @@ final case class Autodoc[A0: Show](
 }
 
 object Autodoc {
+
+  def apply[A: Show](interpreter: Interpreter[Id], p: ActionNel[Autodoc[A]], description: String = "")
+    (test: Response[A] => TestCase[Unit]): TestCase[AutodocMarker] = {
+    val d = if(description.trim.isEmpty) None else Some(description)
+    val r = interpreter.run(p)
+    r match {
+      case -\/(es) => TestCase(TestResult.error(es.list, List()))
+      case \/-(a) => test(a.response).map(v => a.copy(description = d))
+    }
+  }
 
   def json[A <: JsonToString[A]: DecodeJson](req: Request) =
     Core.jsonResponse(req).map(res => Autodoc(None, req, res))
