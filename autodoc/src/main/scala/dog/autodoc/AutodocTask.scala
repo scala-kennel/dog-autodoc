@@ -1,19 +1,16 @@
 package dog
 package autodoc
 
-import java.lang.Thread.UncaughtExceptionHandler
 import java.util.concurrent.ForkJoinPool
 import sbt.testing._
 import scalaz._
 
 private[autodoc] class AutodocTask(
   args: Array[String],
-  taskdef: TaskDef,
-  testClassName: String,
+  override val taskdef: TaskDef,
+  override val testClassName: String,
   testClassLoader: ClassLoader,
-  tracer: DogTracer) extends Task {
-
-  val emptyThrowable = new OptionalThrowable
+  tracer: DogTracer) extends DogTask(args, taskdef, testClassName, testClassLoader, tracer) {
 
   override def taskDef() = taskdef
 
@@ -21,19 +18,7 @@ private[autodoc] class AutodocTask(
 
     val log = DogRunner.logger(loggers)
 
-    lazy val executorService: ForkJoinPool = new ForkJoinPool(
-      sys.runtime.availableProcessors(),
-      ForkJoinPool.defaultForkJoinWorkerThreadFactory,
-      new UncaughtExceptionHandler {
-        def uncaughtException(t: Thread, e: Throwable): Unit = {
-          log.error("uncaughtException Thread = " + t)
-          log.trace(e)
-          e.printStackTrace()
-          executorService.shutdown()
-        }
-      },
-      false
-    )
+    lazy val executorService: ForkJoinPool = DogTask.createForkJoinPool(log)
 
     val only = scalaz.std.list.toNel(
       args.dropWhile("--only" != _).drop(1).takeWhile(arg => !arg.startsWith("--")).toList
@@ -45,13 +30,8 @@ private[autodoc] class AutodocTask(
       val tests = DogRunner.allTests(clazz, obj, only, log)
       val results = tests.map { case (name, test) =>
         val selector = new TestSelector(name)
-        def event(status: Status, duration: Long, result0: TestResult[Any]): DogEvent[Any] = {
-          val err = result0.hasError match {
-            case Some(e) => new OptionalThrowable(e)
-            case None => emptyThrowable
-          }
-          DogEvent(testClassName, taskdef.fingerprint(), selector, status, err, duration, result0)
-        }
+        def event(status: Status, duration: Long, result: TestResult[Any]): DogEvent[Any] =
+          DogTask.event(this, status, selector, duration, result)
 
         val param = obj.paramEndo compose Param.executorService(executorService)
         val start = System.currentTimeMillis()

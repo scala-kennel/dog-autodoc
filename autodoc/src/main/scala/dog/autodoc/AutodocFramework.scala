@@ -10,5 +10,5 @@ class AutodocFramework extends Framework {
   override def fingerprints() = Array[Fingerprint](DogFingerprint)
 
   override def runner(args: Array[String], remoteArgs: Array[String], testClassLoader: ClassLoader) =
-    new AutodocRunner(args, remoteArgs, testClassLoader)
+    new DogRunner(args, remoteArgs, testClassLoader, AutodocRunner.taskdef2task)
 }
