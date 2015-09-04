@@ -21,7 +21,7 @@ object AutodocTest extends Dog {
 
 #### Request
 ```
-GET http://localhost/api
+GET /api
 ```
 
 #### Response
@@ -52,7 +52,7 @@ GET http://localhost/api
 
 #### Request
 ```
-GET http://localhost/person/1
+GET /person/1
 ```
 
 #### Response
@@ -83,7 +83,7 @@ GET http://localhost/person/1
 
 #### Request
 ```
-GET http://localhost/api
+GET /api
 Content-Type: text/plain
 ```
 
@@ -118,7 +118,7 @@ X-XSS-Protection: 1; mode=block
 
 #### Request
 ```
-GET http://localhost/persons?foo=bar&a=b
+GET /persons?foo=bar&a=b
 ```
 
 #### Response

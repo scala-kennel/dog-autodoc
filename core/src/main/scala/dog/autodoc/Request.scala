@@ -1,6 +1,7 @@
 package dog
 package autodoc
 
+import java.net.URI
 import httpz.Request
 
 final case class RequestDocument(
@@ -20,13 +21,14 @@ object RequestDocument {
           kvp <- req.headers
         } yield s"${kvp._1}: ${kvp._2}").mkString("\n")
       }
+    val urlPath = new URI(req.url).getPath()
     val path =
-      if(req.params.isEmpty) req.url
+      if(req.params.isEmpty) urlPath
       else {
         val query = (for {
           kvp <- req.params
         } yield s"${kvp._1}=${kvp._2}").mkString("&")
-        s"${req.url}?${query}"
+        s"${urlPath}?${query}"
       }
     val body = req.body match {
       case None => ""
