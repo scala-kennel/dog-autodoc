@@ -34,7 +34,7 @@ GET /api
       doc <- Autodoc[String](interpreter("{}", 200), getApi) { res =>
         Assert.equal(200, res.status)
       }
-      _ <- Assert.equal(expected, doc.generate("GET /api"))
+      _ <- Assert.equal(expected, doc.generate("GET /api", Autodoc.Markdown))
     } yield doc
   }
 
@@ -68,7 +68,7 @@ GET /person/1
       doc <- Autodoc[Person](interpreter(Person("Alice", 17).toString, 200), getPerson) { res =>
         Assert.equal(200, res.status)
       }
-      _ <- Assert.equal(expected, doc.generate("GET /person/:id"))
+      _ <- Assert.equal(expected, doc.generate("GET /person/:id", Autodoc.Markdown))
     } yield doc
   }
 
@@ -103,7 +103,7 @@ X-XSS-Protection: 1; mode=block
         ), getApiWithHeader) { res =>
           Assert.equal(200, res.status)
         }
-      _ <- Assert.equal(expected, doc.generate("GET /api"))
+      _ <- Assert.equal(expected, doc.generate("GET /api", Autodoc.Markdown))
     } yield doc
   }
 
@@ -134,7 +134,29 @@ GET /persons?foo=bar&a=b
       doc <- Autodoc[Person](interpreter(Person("Alice", 17).toString, 200), queryPerson) { res =>
         Assert.equal(200, res.status)
       }
-      _ <- Assert.equal(expected, doc.generate("GET /persons?foo=bar&a=b"))
+      _ <- Assert.equal(expected, doc.generate("GET /persons?foo=bar&a=b", Autodoc.Markdown))
+    } yield doc
+  }
+
+  val `generate simple html` = {
+    val expected = """<h2>GET /api</h2>
+
+<h4>Request</h4>
+
+<pre><code>GET /api
+</code></pre>
+
+<h4>Response</h4>
+
+<pre><code>200
+
+&quot;{}&quot;
+</code></pre>"""
+    for {
+      doc <- Autodoc[String](interpreter("{}", 200), getApi) { res =>
+        Assert.equal(200, res.status)
+      }
+      _ <- Assert.equal(expected, doc.generate("GET /api", Autodoc.Html))
     } yield doc
   }
 }

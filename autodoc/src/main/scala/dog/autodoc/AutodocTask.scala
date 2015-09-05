@@ -47,7 +47,12 @@ private[autodoc] class AutodocTask(
                 val e = event(Status.Success, duration, r)
                 value match {
                   // XXX
-                  case v: AutodocMarker => e.copy(throwable = new OptionalThrowable(new Exception(v.generate(name))))
+                  case v: AutodocMarker =>
+                    e.copy(throwable = new OptionalThrowable(
+                      new Exception(
+                        v.generate(name, Autodoc.Markdown),
+                        new Exception(v.generate(name, Autodoc.Html))))
+                    )
                   case _ => e
                 }
               }

@@ -1,0 +1,12 @@
+@(title: String, description: Option[String], request: RequestDocument, response: ResponseDocument)
+<h2>@title</h2>@description.map("\n\n<pre>" + _ + "</pre>").getOrElse("")
+
+<h4>Request</h4>
+
+<pre><code>@request.method @request.path@request.headers@request.body
+</code></pre>
+
+<h4>Response</h4>
+
+<pre><code>@response.status@response.headers@response.body
+</code></pre>

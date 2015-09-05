@@ -7,7 +7,7 @@ import argonaut.DecodeJson
 
 trait AutodocMarker {
   type A
-  def generate(title: String): String
+  def generate(title: String, format: Autodoc.Format): String
   def toAutoDoc: Autodoc[A]
 }
 
@@ -18,16 +18,25 @@ final case class Autodoc[A0: Show](
 
   type A = A0
 
-  override def generate(title: String) = {
+  override def generate(title: String, format: Autodoc.Format) = {
     val req = RequestDocument.from(request)
     val res = ResponseDocument.from(implicitly[Show[A]].show(response))
-    dog.autodoc.templates.md.document(title, description, req, res).body.trim
+    format match {
+      case Autodoc.Markdown =>
+        dog.autodoc.templates.md.document(title, description, req, res).body.trim
+      case Autodoc.Html =>
+        html.document(title, description, req, res).body.trim
+    }
   }
 
   override def toAutoDoc = this
 }
 
 object Autodoc {
+
+  sealed abstract class Format
+  case object Markdown extends Format
+  final case object Html extends Format
 
   def apply[A: Show](interpreter: Interpreter[Id], p: ActionNel[Autodoc[A]], description: String = "")
     (test: Response[A] => TestCase[Unit]): TestCase[AutodocMarker] = {
