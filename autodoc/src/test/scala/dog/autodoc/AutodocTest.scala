@@ -11,6 +11,11 @@ object AutodocTest extends Dog {
   def interpreter(value: String, status: Int, headers: Map[String, List[String]] = Map()) =
     FakeInterpreter(str(value), status, headers).sequential.empty
 
+  def run[A: Show](nel: ActionNel[Autodoc[A]], value: String, status: Int, headers: Map[String, List[String]] = Map()) =
+    Autodoc[A](interpreter(value, status, headers), nel) { res =>
+      Assert.equal(200, res.status)
+    }
+
   val getApi = Autodoc.string(Request(
       method = "GET",
       url = "http://localhost/api"
@@ -31,9 +36,7 @@ GET /api
 "{}"
 ```"""
     for {
-      doc <- Autodoc[String](interpreter("{}", 200), getApi) { res =>
-        Assert.equal(200, res.status)
-      }
+      doc <- run[String](getApi, "{}", 200)
       _ <- Assert.equal(expected, doc.generate("GET /api", Autodoc.Markdown))
     } yield doc
   }
@@ -88,9 +91,7 @@ GET /person/1
 }
 ```"""
     for {
-      doc <- Autodoc[Person](interpreter(Person("Alice", 17).toString, 200), getPerson) { res =>
-        Assert.equal(200, res.status)
-      }
+      doc <- run[Person](getPerson, Person("Alice", 17).toString, 200)
       _ <- Assert.equal(expected, doc.generate("GET /person/:id", Autodoc.Markdown))
     } yield doc
   }
@@ -118,14 +119,9 @@ X-XSS-Protection: 1; mode=block
 "{}"
 ```"""
     for {
-      doc <- Autodoc[String](
-        interpreter(
-          "{}",
-          200,
-          Map("X-XSS-Protection" -> List("1", "mode=block"))
-        ), getApiWithHeader) { res =>
-          Assert.equal(200, res.status)
-        }
+      doc <- run[String](getApiWithHeader, "{}", 200,
+        Map("X-XSS-Protection" -> List("1", "mode=block"))
+      )
       _ <- Assert.equal(expected, doc.generate("GET /api", Autodoc.Markdown))
     } yield doc
   }
@@ -154,9 +150,7 @@ GET /persons?foo=bar&a=b
 }
 ```"""
     for {
-      doc <- Autodoc[Person](interpreter(Person("Alice", 17).toString, 200), queryPerson) { res =>
-        Assert.equal(200, res.status)
-      }
+      doc <- run[Person](queryPerson, Person("Alice", 17).toString, 200)
       _ <- Assert.equal(expected, doc.generate("GET /persons?foo=bar&a=b", Autodoc.Markdown))
     } yield doc
   }
@@ -176,9 +170,7 @@ GET /persons?foo=bar&a=b
 &quot;{}&quot;
 </code></pre>"""
     for {
-      doc <- Autodoc[String](interpreter("{}", 200), getApi) { res =>
-        Assert.equal(200, res.status)
-      }
+      doc <- run[String](getApi, "{}", 200)
       _ <- Assert.equal(expected, doc.generate("GET /api", Autodoc.Html))
     } yield doc
   }
