@@ -11,7 +11,7 @@ trait AutodocMarker {
   def toAutoDoc: Autodoc[A]
 }
 
-final case class Autodoc[A0: Show](
+final case class Autodoc[A0: Show] private (
   description: Option[String],
   request: Request,
   response: Response[A0]) extends AutodocMarker {
