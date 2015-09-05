@@ -38,6 +38,29 @@ GET /api
     } yield doc
   }
 
+  val `include description` = {
+    val expected = """## GET /api
+test api
+
+#### Request
+```
+GET /api
+```
+
+#### Response
+```
+200
+
+"{}"
+```"""
+    for {
+      doc <- Autodoc[String](interpreter("{}", 200), getApi, "test api") { res =>
+        Assert.equal(200, res.status)
+      }
+      _ <- Assert.equal(expected, doc.generate("GET /api", Autodoc.Markdown))
+    } yield doc
+  }
+
   case class Person(name: String, age: Int) extends JsonToString[Person]
 
   implicit val personCodec: CodecJson[Person] = casecodec2(Person.apply, Person.unapply)("name", "age")
