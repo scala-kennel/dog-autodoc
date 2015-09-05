@@ -6,17 +6,13 @@ import httpz._
 import argonaut.DecodeJson
 
 trait AutodocMarker {
-  type A
   def generate(title: String, format: Autodoc.Format): String
-  def toAutoDoc: Autodoc[A]
 }
 
-final case class Autodoc[A0: Show] private (
+final case class Autodoc[A: Show] private (
   description: Option[String],
   request: Request,
-  response: Response[A0]) extends AutodocMarker {
-
-  type A = A0
+  response: Response[A]) extends AutodocMarker {
 
   override def generate(title: String, format: Autodoc.Format) = {
     val req = RequestDocument.from(request)
@@ -28,8 +24,6 @@ final case class Autodoc[A0: Show] private (
         html.document(title, description, req, res).body.trim
     }
   }
-
-  override def toAutoDoc = this
 }
 
 object Autodoc {
@@ -39,7 +33,7 @@ object Autodoc {
   final case object Html extends Format
 
   def apply[A: Show](interpreter: Interpreter[Id], p: ActionNel[Autodoc[A]], description: String = "")
-    (test: Response[A] => TestCase[Unit]): TestCase[AutodocMarker] = {
+    (test: Response[A] => TestCase[Unit]): TestCase[Autodoc[A]] = {
     val d = if(description.trim.isEmpty) None else Some(description)
     val r = interpreter.run(p)
     r match {
