@@ -41,6 +41,11 @@ GET /api
     } yield doc
   }
 
+  val getApiWithDescription = Autodoc.string(Request(
+      method = "GET",
+      url = "http://localhost/api"
+    ), "test api").leftMap(Error.http).nel
+
   val `include description` = {
     val expected = """## GET /api
 test api
@@ -57,7 +62,7 @@ GET /api
 "{}"
 ```"""
     for {
-      doc <- Autodoc[String](interpreter("{}", 200), getApi, "test api") { res =>
+      doc <- Autodoc[String](interpreter("{}", 200), getApiWithDescription) { res =>
         Assert.equal(200, res.status)
       }
       _ <- Assert.equal(expected, doc.generate("GET /api", Autodoc.Markdown))
