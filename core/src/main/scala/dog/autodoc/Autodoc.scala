@@ -9,21 +9,16 @@ trait AutodocMarker {
   def generate(title: String, format: Autodoc.Format): String
 }
 
-final case class Autodoc[A: Show] private (
-  description: Option[String],
-  request: Request,
-  response: Response[A]) extends AutodocMarker {
+sealed abstract class Autodoc[A: Show] extends AutodocMarker {
 
-  override def generate(title: String, format: Autodoc.Format) = {
-    val req = RequestDocument.from(request)
-    val res = ResponseDocument.from(implicitly[Show[A]].show(response))
-    format match {
-      case Autodoc.Markdown =>
-        dog.autodoc.templates.md.document(title, description, req, res).body.trim
-      case Autodoc.Html =>
-        html.document(title, description, req, res).body.trim
-    }
-  }
+  def description: Option[String]
+
+  def request: Request
+
+  def response: Response[A]
+
+  // not Functor
+  def map[B: Show](f: A => B): Autodoc[B]
 }
 
 object Autodoc {
@@ -41,18 +36,37 @@ object Autodoc {
     }
   }
 
+  private[this] final case class AutodocImpl[A: Show](
+    override val description: Option[String],
+    override val request: Request,
+    override val response: Response[A]) extends Autodoc[A] {
+
+    override def generate(title: String, format: Format) = {
+      val req = RequestDocument.from(request)
+      val res = ResponseDocument.from(implicitly[Show[A]].show(response))
+      format match {
+        case Markdown =>
+          dog.autodoc.templates.md.document(title, description, req, res).body.trim
+        case Html =>
+          html.document(title, description, req, res).body.trim
+      }
+    }
+
+    override def map[B: Show](f: A => B) = AutodocImpl(description, request, response.map(f))
+  }
+
   private[this] def descriptionOption[A](description: String): Option[String] =
     if(description.trim.isEmpty) None else Some(description)
 
   def json[A <: JsonToString[A]: DecodeJson](req: Request, description: String = "") =
-    Core.jsonResponse(req).map(res =>
-      Autodoc(descriptionOption(description), req, res))
+    Core.jsonResponse(req).map[Autodoc[A]](res =>
+      AutodocImpl(descriptionOption(description), req, res))
 
   def string(req: Request, description: String = "") =
-    Core.stringResponse(req).map(res =>
-      Autodoc(descriptionOption(description), req, res))
+    Core.stringResponse(req).map[Autodoc[String]](res =>
+      AutodocImpl(descriptionOption(description), req, res))
 
   def raw(req: Request, description: String = "") =
-    Core.raw(req).map(res =>
-      Autodoc(descriptionOption(description), req, res))
+    Core.raw(req).map[Autodoc[ByteArray]](res =>
+      AutodocImpl(descriptionOption(description), req, res))
 }
