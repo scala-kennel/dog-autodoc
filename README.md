@@ -12,3 +12,7 @@ libraryDependencies += "com.github.pocketberserker" %% "dog-autodoc" % "0.1.3" %
 
 or you can use [sbt plugin](https://github.com/pocketberserker/sbt-dog-autodoc)
 
+## Examples
+
+see also [dog-autodoc-examples](https://github.com/pocketberserker/dog-autodoc-examples)
+
