@@ -33,7 +33,7 @@ object Autodoc {
   final case object Html extends Format
 
   def apply[A: Show](interpreter: Interpreter[Id], p: ActionNel[Autodoc[A]])
-    (test: Response[A] => TestCase[Unit]): TestCase[Autodoc[A]] = {
+    (test: Response[A] => TestCase[Unit]): TestCase[Autodoc[A]] = TestCase.delay {
     val r = interpreter.run(p)
     r match {
       case -\/(es) => TestCase(TestResult.error(es.list, List()))
