@@ -1,5 +1,5 @@
 @(title: String, description: Option[String], request: RequestDocument, response: ResponseDocument)
-<h2>@title</h2>@description.map("\n\n<pre>" + _ + "</pre>").getOrElse("")
+<h2>@title</h2>@description.map("\n\n" + _).getOrElse("")
 
 <h4>Request</h4>
 
