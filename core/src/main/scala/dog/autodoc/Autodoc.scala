@@ -1,7 +1,7 @@
 package dog
 package autodoc
 
-import scalaz._, Id._
+import scalaz._, Id._, Free._
 import httpz._
 import argonaut.DecodeJson
 
@@ -58,15 +58,18 @@ object Autodoc {
   private[this] def descriptionOption[A](description: String): Option[String] =
     if(description.trim.isEmpty) None else Some(description)
 
-  def json[A <: JsonToString[A]: DecodeJson](req: Request, description: String = "") =
+  def json[A <: JsonToString[A]: DecodeJson](req: Request, description: String = "")
+    : EitherT[({type l[a] = FreeC[RequestF, a]})#l, Error, Autodoc[A]] =
     Core.jsonResponse(req).map[Autodoc[A]](res =>
       AutodocImpl(descriptionOption(description), req, res))
 
-  def string(req: Request, description: String = "") =
+  def string(req: Request, description: String = "")
+    : EitherT[({type l[a] = FreeC[RequestF, a]})#l, Throwable, Autodoc[String]] =
     Core.stringResponse(req).map[Autodoc[String]](res =>
       AutodocImpl(descriptionOption(description), req, res))
 
-  def raw(req: Request, description: String = "") =
+  def raw(req: Request, description: String = "")
+    : EitherT[({type l[a] = FreeC[RequestF, a]})#l, Throwable, Autodoc[ByteArray]] =
     Core.raw(req).map[Autodoc[ByteArray]](res =>
       AutodocImpl(descriptionOption(description), req, res))
 }
