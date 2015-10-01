@@ -38,12 +38,9 @@ private[autodoc] class AutodocTask(
             value match {
               // XXX
               case v: AutodocMarker =>
-                e.copy(throwable = new OptionalThrowable(
-                  new Exception(
-                    v.generate(name, autodoc.markdown),
-                    new Exception(v.generate(name, autodoc.html)))
-                  )
-                )
+                lazy val markdown = v.generate(name, autodoc.markdown)
+                lazy val html = v.generate(name, autodoc.html)
+                e.copy(throwable = new OptionalThrowable(new Exception(markdown, new Exception(html))))
               case _ => e
             }
           case _ => e
