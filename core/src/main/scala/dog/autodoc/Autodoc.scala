@@ -24,8 +24,14 @@ sealed abstract class Autodoc[A: Show] extends AutodocMarker {
 object Autodoc {
 
   sealed abstract class Format
-  case object Markdown extends Format
-  final case object Html extends Format
+  final case class Markdown(
+    generate: (String, Option[String], RequestDocument, ResponseDocument) => play.twirl.api.Content
+      =  dog.autodoc.templates.md.document.apply _
+  ) extends Format
+  final case class Html(
+    generate: (String, Option[String], RequestDocument, ResponseDocument) => play.twirl.api.Content
+      =  html.document.apply _
+  ) extends Format
 
   def apply[A: Show](interpreter: Interpreter[Id], p: ActionNel[Autodoc[A]])
     (test: Response[A] => TestCase[Unit]): TestCase[Autodoc[A]] = TestCase.delay {
@@ -44,12 +50,10 @@ object Autodoc {
     override def generate(title: String, format: Format) = {
       val req = RequestDocument.from(request)
       val res = ResponseDocument.from(implicitly[Show[A]].show(response))
-      format match {
-        case Markdown =>
-          dog.autodoc.templates.md.document(title, description, req, res).body.trim
-        case Html =>
-          html.document(title, description, req, res).body.trim
-      }
+      (format match {
+        case Markdown(generate) => generate
+        case Html(generate) => generate
+      })(title, description, req, res).body.trim
     }
 
     override def map[B: Show](f: A => B) = AutodocImpl(description, request, response.map(f))

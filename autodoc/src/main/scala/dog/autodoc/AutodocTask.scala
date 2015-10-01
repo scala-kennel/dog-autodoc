@@ -33,6 +33,22 @@ private[autodoc] class AutodocTask(
         def event(status: Status, duration: Long, result: TestResult[Any]): DogEvent[Any] =
           DogTask.event(this, status, selector, duration, result)
 
+        def doc(value: Any, e: DogEvent[Any]): DogEvent[Any] = obj match {
+          case autodoc: DogAutodoc =>
+            value match {
+              // XXX
+              case v: AutodocMarker =>
+                e.copy(throwable = new OptionalThrowable(
+                  new Exception(
+                    v.generate(name, autodoc.markdown),
+                    new Exception(v.generate(name, autodoc.html)))
+                  )
+                )
+              case _ => e
+            }
+          case _ => e
+        }
+
         val param = obj.paramEndo compose Param.executorService(executorService)
         val start = System.currentTimeMillis()
         val r = try {
@@ -42,20 +58,9 @@ private[autodoc] class AutodocTask(
           obj.listener.onFinish(obj, name, test, r, log)
           r match {
             case Done(results) => results.list match {
-              case List(\/-(value)) => {
+              case List(\/-(value)) =>
                 tracer.success()
-                val e = event(Status.Success, duration, r)
-                value match {
-                  // XXX
-                  case v: AutodocMarker =>
-                    e.copy(throwable = new OptionalThrowable(
-                      new Exception(
-                        v.generate(name, Autodoc.Markdown),
-                        new Exception(v.generate(name, Autodoc.Html))))
-                    )
-                  case _ => e
-                }
-              }
+                doc(value, event(Status.Success, duration, r))
               case List(-\/(Skipped(_))) =>
                 tracer.ignore()
                 event(Status.Ignored, duration, r)
