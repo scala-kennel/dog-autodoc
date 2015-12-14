@@ -1,6 +1,6 @@
 # dog-autodoc
 
-[![Build Status](https://travis-ci.org/pocketberserker/dog-autodoc.svg?branch=master)](https://travis-ci.org/pocketberserker/dog-autodoc)
+[![Build Status](https://travis-ci.org/scala-kennel/dog-autodoc.svg?branch=master)](https://travis-ci.org/scala-kennel/dog-autodoc)
 
 This library is a port of [autodoc](https://github.com/r7kamura/autodoc) for [dog](https://github.com/scala-kennel/dog).
 
