@@ -4,7 +4,7 @@ object Dependencies {
 
   object Version {
     val dog = "0.1.5"
-    val httpz = "0.3.0"
+    val httpz = "0.3.1"
   }
 
   val dogCore = "com.github.pocketberserker" %% "dog-core" % Version.dog
