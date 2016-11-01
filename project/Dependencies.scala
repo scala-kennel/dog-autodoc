@@ -3,8 +3,8 @@ import sbt._, Keys._
 object Dependencies {
 
   object Version {
-    val dog = "0.1.5"
-    val httpz = "0.3.1"
+    val dog = "0.7.0"
+    val httpz = "0.5.0"
   }
 
   val dogCore = "com.github.pocketberserker" %% "dog-core" % Version.dog

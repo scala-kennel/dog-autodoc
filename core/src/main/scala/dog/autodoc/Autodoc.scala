@@ -33,13 +33,14 @@ object Autodoc {
       =  html.document.apply _
   ) extends Format
 
-  def apply[A: Show](interpreter: Interpreter[Id], p: ActionNel[Autodoc[A]])
-    (test: Response[A] => TestCase[Unit]): TestCase[Autodoc[A]] = TestCase.delay {
-    val r = interpreter.run(p)
-    r match {
-      case -\/(es) => TestCase(TestResult.error(es.list, List()))
-      case \/-(a) => test(a.response).map(Function.const(a))
+  def apply[A: Show](interpreter: Interpreter[Id], p: ActionNel[Autodoc[A]])(test: Response[A] => TestCaseAp[Unit]): TestCase[Autodoc[A]] = {
+    val t: TestCaseAp[Autodoc[A]] = TestCase {
+      interpreter.run(p) match {
+        case -\/(es) => TestCase.handle(es.list.map(_.asInstanceOf[Throwable]))
+        case \/-(a) => test(a.response).map(Function.const(a))
+      }
     }
+    t.monadic
   }
 
   private[this] final case class AutodocImpl[A: Show](
@@ -63,17 +64,17 @@ object Autodoc {
     if(description.trim.isEmpty) None else Some(description)
 
   def json[A <: JsonToString[A]: DecodeJson](req: Request, description: String = "")
-    : EitherT[({type l[a] = FreeC[RequestF, a]})#l, Error, Autodoc[A]] =
+    : EitherT[({type l[a] = Free[RequestF, a]})#l, Error, Autodoc[A]] =
     Core.jsonResponse(req).map[Autodoc[A]](res =>
       AutodocImpl(descriptionOption(description), req, res))
 
   def string(req: Request, description: String = "")
-    : EitherT[({type l[a] = FreeC[RequestF, a]})#l, Throwable, Autodoc[String]] =
+    : EitherT[({type l[a] = Free[RequestF, a]})#l, Throwable, Autodoc[String]] =
     Core.stringResponse(req).map[Autodoc[String]](res =>
       AutodocImpl(descriptionOption(description), req, res))
 
   def raw(req: Request, description: String = "")
-    : EitherT[({type l[a] = FreeC[RequestF, a]})#l, Throwable, Autodoc[ByteArray]] =
+    : EitherT[({type l[a] = Free[RequestF, a]})#l, Throwable, Autodoc[ByteArray]] =
     Core.raw(req).map[Autodoc[ByteArray]](res =>
       AutodocImpl(descriptionOption(description), req, res))
 }
