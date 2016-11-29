@@ -25,7 +25,7 @@ object Common {
     dogSettings
   ).flatten ++ Seq(
     scalaVersion := scala211,
-    crossScalaVersions := Seq("2.10.6", scala211),
+    crossScalaVersions := Seq("2.10.6", scala211, "2.12.0"),
     resolvers += Opts.resolver.sonatypeReleases,
     scalacOptions ++= (
       "-deprecation" ::
