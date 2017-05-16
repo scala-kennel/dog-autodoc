@@ -3,7 +3,7 @@ import sbt._, Keys._
 object Dependencies {
 
   object Version {
-    val dog = "0.7.0"
+    val dog = "0.8.0"
     val httpz = "0.5.0"
   }
 
